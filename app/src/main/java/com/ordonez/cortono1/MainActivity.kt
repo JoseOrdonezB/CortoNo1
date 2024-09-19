@@ -1,3 +1,5 @@
+package com.ordonez.cortono1
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
