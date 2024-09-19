@@ -101,14 +101,16 @@ fun TicTacToeGame() {
         }
     } else {
         // Juego de Tic-Tac-Toe adaptado al tamaño del tablero
-        TicTacToeBoard(player1Name, player2Name, boardSize)
+        TicTacToeBoard(player1Name, player2Name, boardSize, onBack = { sizeSelected = false })
     }
 }
 
+
+
 @Composable
-fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
+fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int, onBack: () -> Unit) {
     var board by remember { mutableStateOf(Array(boardSize) { Array(boardSize) { "" } }) }
-    var currentPlayer by remember { mutableStateOf("X") }
+    var currentPlayer by remember { mutableStateOf(if (Random.nextBoolean()) "X" else "O") }
     var winner by remember { mutableStateOf<String?>(null) }
     var gameOver by remember { mutableStateOf(false) }
     var scaleFactor by remember { mutableStateOf(1f) }
@@ -200,19 +202,28 @@ fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
                 board = Array(boardSize) { Array(boardSize) { "" } }
-                currentPlayer = "X"
+                currentPlayer = if (Random.nextBoolean()) "X" else "O"  // Jugador inicial aleatorio
                 winner = null
                 gameOver = false
-            },
-            modifier = Modifier.padding(top = 16.dp)
+            }
         ) {
             Text("Reiniciar")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón de regreso
+        Button(onClick = { onBack() }) {
+            Text(text = "Regresar")
+        }
     }
 }
+
 
 fun checkWinner(board: Array<Array<String>>, boardSize: Int): Boolean {
 
