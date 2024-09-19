@@ -206,20 +206,45 @@ fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
 }
 
 fun checkWinner(board: Array<Array<String>>, boardSize: Int): Boolean {
-    val lines = mutableListOf<List<String>>()
 
-    // Filas y columnas
+    // Verificar filas
     for (i in 0 until boardSize) {
-        lines.add(board[i].toList()) // Filas
-        lines.add(List(boardSize) { j -> board[j][i] }) // Columnas
+        for (j in 0..boardSize - 3) {
+            // Verifica cada sublista de 3 elementos consecutivos en la fila
+            if (board[i][j] != "" && board[i][j] == board[i][j + 1] && board[i][j] == board[i][j + 2]) {
+                return true
+            }
+        }
     }
 
-    // Diagonales
-    lines.add(List(boardSize) { i -> board[i][i] }) // Diagonal principal
-    lines.add(List(boardSize) { i -> board[i][boardSize - i - 1] }) // Diagonal inversa
+    // Verificar columnas
+    for (i in 0 until boardSize) {
+        for (j in 0..boardSize - 3) {
+            // Verifica cada sublista de 3 elementos consecutivos en la columna
+            if (board[j][i] != "" && board[j][i] == board[j + 1][i] && board[j][i] == board[j + 2][i]) {
+                return true
+            }
+        }
+    }
 
-    return lines.any { line -> line.all { it == "X" } || line.all { it == "O" } }
+    // Verificar diagonales (principal y secundaria)
+    for (i in 0..boardSize - 3) {
+        for (j in 0..boardSize - 3) {
+            // Diagonal principal (de arriba a abajo)
+            if (board[i][j] != "" && board[i][j] == board[i + 1][j + 1] && board[i][j] == board[i + 2][j + 2]) {
+                return true
+            }
+
+            // Diagonal inversa (de arriba a abajo)
+            if (board[i][boardSize - j - 1] != "" && board[i][boardSize - j - 1] == board[i + 1][boardSize - j - 2] && board[i][boardSize - j - 1] == board[i + 2][boardSize - j - 3]) {
+                return true
+            }
+        }
+    }
+
+    return false
 }
+
 
 fun isBoardFull(board: Array<Array<String>>): Boolean {
     return board.all { row -> row.all { it.isNotEmpty() } }
