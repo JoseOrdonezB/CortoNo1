@@ -31,10 +31,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TicTacToeGame() {
-    // Estado para los nombres de los jugadores
     var player1Name by remember { mutableStateOf("") }
     var player2Name by remember { mutableStateOf("") }
+    var boardSize by remember { mutableStateOf(3) } // Tamaño inicial del tablero 3x3
     var namesSubmitted by remember { mutableStateOf(false) }
+    var sizeSelected by remember { mutableStateOf(false) }
 
     if (!namesSubmitted) {
         // Pantalla de entrada de nombres de los jugadores
@@ -45,7 +46,6 @@ fun TicTacToeGame() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Campo de entrada para el nombre del Jugador 1
             OutlinedTextField(
                 value = player1Name,
                 onValueChange = { player1Name = it },
@@ -53,7 +53,6 @@ fun TicTacToeGame() {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            // Campo de entrada para el nombre del Jugador 2
             OutlinedTextField(
                 value = player2Name,
                 onValueChange = { player2Name = it },
@@ -61,7 +60,6 @@ fun TicTacToeGame() {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            // Botón para confirmar los nombres
             Button(
                 onClick = {
                     if (player1Name.isNotBlank() && player2Name.isNotBlank()) {
@@ -69,18 +67,45 @@ fun TicTacToeGame() {
                     }
                 }
             ) {
-                Text("Comenzar Juego")
+                Text("Confirmar Nombres")
+            }
+        }
+    } else if (!sizeSelected) {
+        // Pantalla para seleccionar el tamaño del tablero
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Selecciona el tamaño del tablero:", fontSize = 24.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = { boardSize = 3; sizeSelected = true }) {
+                    Text("3x3")
+                }
+                Button(onClick = { boardSize = 4; sizeSelected = true }) {
+                    Text("4x4")
+                }
+                Button(onClick = { boardSize = 5; sizeSelected = true }) {
+                    Text("5x5")
+                }
             }
         }
     } else {
-        // Juego de Tic-Tac-Toe con los nombres de los jugadores
-        TicTacToeBoard(player1Name, player2Name)
+        // Juego de Tic-Tac-Toe adaptado al tamaño del tablero
+        TicTacToeBoard(player1Name, player2Name, boardSize)
     }
 }
 
 @Composable
-fun TicTacToeBoard(player1Name: String, player2Name: String) {
-    var board by remember { mutableStateOf(Array(3) { Array(3) { "" } }) }
+fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
+    var board by remember { mutableStateOf(Array(boardSize) { Array(boardSize) { "" } }) }
     var currentPlayer by remember { mutableStateOf("X") }
     var winner by remember { mutableStateOf<String?>(null) }
     var gameOver by remember { mutableStateOf(false) }
@@ -94,7 +119,7 @@ fun TicTacToeBoard(player1Name: String, player2Name: String) {
     LaunchedEffect(gameOver) {
         if (gameOver) {
             delay(1000)
-            board = Array(3) { Array(3) { "" } }
+            board = Array(boardSize) { Array(boardSize) { "" } }
             currentPlayer = "X"
             winner = null
             gameOver = false
@@ -125,10 +150,10 @@ fun TicTacToeBoard(player1Name: String, player2Name: String) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Dibuja el tablero 3x3
-        for (i in 0..2) {
+        // Dibuja el tablero de acuerdo al tamaño seleccionado
+        for (i in 0 until boardSize) {
             Row {
-                for (j in 0..2) {
+                for (j in 0 until boardSize) {
                     Box(
                         modifier = Modifier
                             .size(100.dp)
@@ -142,7 +167,7 @@ fun TicTacToeBoard(player1Name: String, player2Name: String) {
                                 if (board[i][j] == "" && winner == null) {
                                     board[i][j] = currentPlayer
                                     scaleFactor = 1.2f
-                                    if (checkWinner(board)) {
+                                    if (checkWinner(board, boardSize)) {
                                         winner = currentPlayer
                                         gameOver = true
                                     } else if (isBoardFull(board)) {
@@ -168,7 +193,7 @@ fun TicTacToeBoard(player1Name: String, player2Name: String) {
 
         Button(
             onClick = {
-                board = Array(3) { Array(3) { "" } }
+                board = Array(boardSize) { Array(boardSize) { "" } }
                 currentPlayer = "X"
                 winner = null
                 gameOver = false
@@ -180,17 +205,19 @@ fun TicTacToeBoard(player1Name: String, player2Name: String) {
     }
 }
 
-fun checkWinner(board: Array<Array<String>>): Boolean {
-    val lines = listOf(
-        listOf(board[0][0], board[0][1], board[0][2]),
-        listOf(board[1][0], board[1][1], board[1][2]),
-        listOf(board[2][0], board[2][1], board[2][2]),
-        listOf(board[0][0], board[1][0], board[2][0]),
-        listOf(board[0][1], board[1][1], board[2][1]),
-        listOf(board[0][2], board[1][2], board[2][2]),
-        listOf(board[0][0], board[1][1], board[2][2]),
-        listOf(board[0][2], board[1][1], board[2][0])
-    )
+fun checkWinner(board: Array<Array<String>>, boardSize: Int): Boolean {
+    val lines = mutableListOf<List<String>>()
+
+    // Filas y columnas
+    for (i in 0 until boardSize) {
+        lines.add(board[i].toList()) // Filas
+        lines.add(List(boardSize) { j -> board[j][i] }) // Columnas
+    }
+
+    // Diagonales
+    lines.add(List(boardSize) { i -> board[i][i] }) // Diagonal principal
+    lines.add(List(boardSize) { i -> board[i][boardSize - i - 1] }) // Diagonal inversa
+
     return lines.any { line -> line.all { it == "X" } || line.all { it == "O" } }
 }
 
