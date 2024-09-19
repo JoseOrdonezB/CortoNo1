@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
+import kotlin.random.Random
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -128,7 +129,7 @@ fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
         if (gameOver) {
             delay(1000)
             board = Array(boardSize) { Array(boardSize) { "" } }
-            currentPlayer = "X"
+            currentPlayer = if (Random.nextBoolean()) "X" else "O"  // Jugador inicial aleatorio
             winner = null
             gameOver = false
         }
