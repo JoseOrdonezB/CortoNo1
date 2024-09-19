@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -111,6 +112,13 @@ fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
     var gameOver by remember { mutableStateOf(false) }
     var scaleFactor by remember { mutableStateOf(1f) }
 
+    // Obtener el ancho de la pantalla
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.dp
+
+    // Calcular el tamaño de las celdas basado en el tamaño del tablero
+    val cellSize = (screenWidthDp / boardSize) - 8.dp  // 8.dp es el padding entre las celdas
+
     val scale by animateFloatAsState(
         targetValue = scaleFactor,
         animationSpec = tween(durationMillis = 300)
@@ -156,7 +164,7 @@ fun TicTacToeBoard(player1Name: String, player2Name: String, boardSize: Int) {
                 for (j in 0 until boardSize) {
                     Box(
                         modifier = Modifier
-                            .size(100.dp)
+                            .size(cellSize)
                             .padding(4.dp)
                             .scale(scale)
                             .background(
